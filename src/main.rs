@@ -111,8 +111,8 @@ fn main() {
     print_pretty_tokens(&postfix_tokens);
 
     // Solve postfix
-    // let answer: f64 = solve_postfix(&mut postfix_tokens);
-    // println!("Answer: {}", answer)
+    let answer: f64 = solve_postfix(&mut postfix_tokens);
+    println!("\nAnswer: {}\n", answer)
 }
 
 fn print_pretty_tokens(tokens: &Vec<Token>) {
@@ -283,8 +283,8 @@ fn create_tokens(input: &String) -> Vec<Token> {
         }
     }
     if cache.len() > 0 {
-        println!("Pushing remaining cache to answer.");
-        println!("cache: {:?}", cache);
+        // println!("Pushing remaining cache to answer.");
+        // println!("cache: {:?}", cache);
         save_and_clear_cache(&mut cache, &mut answer);
     }
     answer
@@ -385,5 +385,88 @@ fn create_postfix(tokens: &mut Vec<Token>) -> Vec<Token> {
     output_queue
 }
 
-// fn solve_postfix(tokens: &mut Vec<Token>) -> f64 {
-// }
+fn solve_postfix(tokens: &mut Vec<Token>) -> f64 {
+    println!("\nSolving Postfix...");
+
+    let mut answer: f64 = 0.0;
+    let mut stack: Vec<f64> = vec![];
+    let mut i: u64 = 0;
+
+    // reverse the tokens so we can pop them off as we cycle through
+    tokens.reverse();
+
+    'main: loop {
+        if tokens.len() == 1 && stack.len() == 0 {
+            println!("DONE!");
+            let a = tokens[0].keyword.parse();
+            let a: f64 = match a {
+                Ok(o) => o,
+                Err(_) => panic!("Failed Parsing"),
+            };
+            answer = a;
+            break 'main;
+        };
+        i = i + 1;
+
+        let x: Token = match tokens.pop() {
+            Some(x) => x,
+            None => {
+                panic!("No token found! x");
+            }
+        };
+        // println!("x: {:?}", x);
+
+        if x.token_type == TokenType::Float {
+            let y1 = x.keyword.parse();
+            let y2 = match y1 {
+                Ok(o) => o,
+                Err(_) => panic!("Failed Parsing"),
+            };
+            stack.push(y2);
+            // println!("Pushed to stack");
+            // println!("stack: {:?}", stack);
+        } else if x.token_type == TokenType::Operator {
+            let mut sub_answer: f64 = 0.0;
+            print!("\n\tSolving: ");
+
+            // println!("solving stack: {:?}", stack);
+            let var2: f64 = match stack.pop() {
+                Some(x) => x,
+                None => {
+                    panic!("No token found! var1");
+                }
+            };
+            let var1: f64 = match stack.pop() {
+                Some(x) => x,
+                None => {
+                    panic!("No token found! var2");
+                }
+            };
+
+            if x.keyword == "+" {
+                print!("{} + {}", var1, var2);
+                sub_answer = var1 + var2;
+            } else if x.keyword == "-" {
+                print!("{} - {}", var1, var2);
+                sub_answer = var1 - var2;
+            } else if x.keyword == "*" {
+                print!("{} * {}", var1, var2);
+                sub_answer = var1 * var2;
+            } else if x.keyword == "/" {
+                print!("{} / {}", var1, var2);
+                sub_answer = var1 / var2;
+            }
+
+            // create a new token
+            let new_token: Token = Token {
+                keyword: sub_answer.to_string(),
+                token_type: TokenType::Float,
+                parameters: 0,
+                associativity: Associativity::None,
+                precedence: 1,
+            };
+            tokens.push(new_token);
+        }
+    }
+    answer
+}
