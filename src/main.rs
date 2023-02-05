@@ -397,7 +397,7 @@ fn solve_postfix(tokens: &mut Vec<Token>) -> f64 {
 
     'main: loop {
         if tokens.len() == 1 && stack.len() == 0 {
-            println!("DONE!");
+            println!("\n\nI have finished solving your math problem!");
             let a = tokens[0].keyword.parse();
             let a: f64 = match a {
                 Ok(o) => o,
@@ -455,6 +455,9 @@ fn solve_postfix(tokens: &mut Vec<Token>) -> f64 {
             } else if x.keyword == "/" {
                 print!("{} / {}", var1, var2);
                 sub_answer = var1 / var2;
+            } else if x.keyword == "^" {
+                print!("{} ^ {}", var1, var2);
+                sub_answer = var1.powf(var2);
             }
 
             // create a new token
